@@ -249,10 +249,14 @@
             let totalCost = 0;
 
             const tableBody = document.getElementById('table-body');
-            tableBody.querySelectorAll('tr').forEach((row, index) => {
+            // Select only data rows, not category headers
+            tableBody.querySelectorAll('tr[data-type]').forEach(row => {
                 const qtyInput = row.querySelector('.qty-input');
                 const priceInput = row.querySelector('.price-input');
                 const totalCell = row.querySelector('.total-cell');
+
+                // This check is important, although the selector should prevent this
+                if (!qtyInput || !priceInput) return;
 
                 const qty = parseFloat(qtyInput.value) || 0;
                 const price = parseFloat(priceInput.value) || 0;
@@ -260,7 +264,7 @@
 
                 totalCell.textContent = formatCurrency(total);
 
-                if (initialData[index].type === 'revenue') {
+                if (row.dataset.type === 'revenue') {
                     totalRevenue += total;
                 } else {
                     totalCost += total;
@@ -287,6 +291,7 @@
 
         function renderTable() {
             const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = ''; // Clear existing table rows
             let lastFreq = '';
             initialData.forEach((data, index) => {
                 if (data.freq !== lastFreq) {
@@ -298,6 +303,9 @@
                 }
 
                 const row = document.createElement('tr');
+                // Add data-type to the row itself
+                row.dataset.type = data.type;
+                
                 row.innerHTML = `
                     <td>${data.freq}</td>
                     <td>${data.cat}</td>
