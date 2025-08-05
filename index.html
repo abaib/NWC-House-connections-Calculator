@@ -95,7 +95,7 @@
             font-weight: 700;
         }
         input[type="number"] {
-            width: 120px;
+            width: 100px;
             padding: 0.5rem;
             border: 1px solid #d1d5db;
             border-radius: 0.375rem;
@@ -139,34 +139,13 @@
         .summary-item .value.net-loss { color: #b91c1c; }
 
         @media print {
-            body {
-                background-color: #fff;
-            }
-            .table-container {
-                margin: 0;
-                box-shadow: none;
-                border: none;
-            }
-            .table-header, .actions-bar, .summary-card {
-                display: none;
-            }
-            input[type="number"] {
-                border: none;
-                padding: 0;
-                -moz-appearance: textfield;
-            }
-            input::-webkit-outer-spin-button,
-            input::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
-            }
-            .currency::before {
-                content: '';
-            }
-            td, th {
-                padding: 0.5rem;
-                font-size: 10pt;
-            }
+            body { background-color: #fff; }
+            .table-container { margin: 0; box-shadow: none; border: none; }
+            .table-header, .actions-bar, .summary-card { display: none; }
+            input[type="number"] { border: none; padding: 0; -moz-appearance: textfield; }
+            input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+            .currency::before { content: ''; }
+            td, th { padding: 0.5rem; font-size: 10pt; }
         }
     </style>
 </head>
@@ -207,268 +186,137 @@
         <table id="financial-table">
             <thead>
                 <tr>
+                    <th>Frequency</th>
+                    <th>Category</th>
                     <th>Item / Role</th>
-                    <th>Description / Headcount</th>
-                    <th>Unit Cost / Revenue</th>
-                    <th>Quantity / Months</th>
+                    <th>Qty</th>
+                    <th>Unit Price / Revenue</th>
                     <th>Total</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Revenue Section -->
-                <tr class="category-header">
-                    <td colspan="5">1. Project Revenue</td>
-                </tr>
-                <tr>
-                    <td>Pipe Work Installation</td>
-                    <td>Revenue per meter of pipe work</td>
-                    <td class="currency"><input type="number" id="revenue-pipe-per-meter" value="0" oninput="calculateAll()"></td>
-                    <td><input type="number" id="qty-pipe-meters" value="1000" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-revenue-pipe">0.00</td>
-                </tr>
-                <tr>
-                    <td>Water Meter Installation</td>
-                    <td>Revenue per installed water meter</td>
-                    <td class="currency"><input type="number" id="revenue-water-meter" value="3000" oninput="calculateAll()"></td>
-                    <td><input type="number" id="qty-water-meters" value="50" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-revenue-water-meter">150,000.00</td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="4">Total Revenue</td>
-                    <td class="currency" id="total-revenue">150,000.00</td>
-                </tr>
-
-                <!-- Monthly Recurring Costs Section -->
-                <tr class="category-header">
-                    <td colspan="5">2. Monthly Recurring Costs (Per Team)</td>
-                </tr>
-                <!-- Personnel -->
-                <tr>
-                    <td>Supervisor</td>
-                    <td>1</td>
-                    <td class="currency"><input type="number" id="cost-supervisor" value="8500" oninput="calculateAll()"></td>
-                    <td><input type="number" class="qty" id="months-personnel" value="12" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-supervisor">102,000.00</td>
-                </tr>
-                <tr>
-                    <td>Plumber</td>
-                    <td>1</td>
-                    <td class="currency"><input type="number" id="cost-plumber" value="7000" oninput="calculateAll()"></td>
-                    <td class="ref-qty" data-ref="months-personnel">12</td>
-                    <td class="currency" id="total-plumber">84,000.00</td>
-                </tr>
-                <tr>
-                    <td>Driver</td>
-                    <td>1</td>
-                    <td class="currency"><input type="number" id="cost-driver" value="6000" oninput="calculateAll()"></td>
-                    <td class="ref-qty" data-ref="months-personnel">12</td>
-                    <td class="currency" id="total-driver">72,000.00</td>
-                </tr>
-                <tr>
-                    <td>Laborer</td>
-                    <td>4</td>
-                    <td class="currency"><input type="number" id="cost-laborer" value="5500" oninput="calculateAll()"></td>
-                    <td class="ref-qty" data-ref="months-personnel">12</td>
-                    <td class="currency" id="total-laborer">264,000.00</td>
-                </tr>
-                <!-- Machinery Rental -->
-                 <tr>
-                    <td>JCB Backhoe Loader</td>
-                    <td>1 (Monthly Rental)</td>
-                    <td class="currency"><input type="number" id="cost-jcb" value="12000" oninput="calculateAll()"></td>
-                    <td class="ref-qty" data-ref="months-personnel">12</td>
-                    <td class="currency" id="total-jcb">144,000.00</td>
-                </tr>
-                 <tr>
-                    <td>Dump Truck</td>
-                    <td>1 (Monthly Rental)</td>
-                    <td class="currency"><input type="number" id="cost-dumptruck" value="6000" oninput="calculateAll()"></td>
-                    <td class="ref-qty" data-ref="months-personnel">12</td>
-                    <td class="currency" id="total-dumptruck">72,000.00</td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="4">Total Recurring Costs</td>
-                    <td class="currency" id="total-recurring-costs">738,000.00</td>
-                </tr>
-
-                <!-- Capital & Variable Costs Section -->
-                <tr class="category-header">
-                    <td colspan="5">3. Capital & Variable Costs</td>
-                </tr>
-                <tr>
-                    <td>"Dina" Truck</td>
-                    <td>Purchase or Lease</td>
-                    <td class="currency"><input type="number" id="cost-dina" value="0" oninput="calculateAll()"></td>
-                    <td>1</td>
-                    <td class="currency" id="total-dina">0.00</td>
-                </tr>
-                <tr>
-                    <td>Safety Equipment</td>
-                    <td>Signs, lighting, permits, PPE</td>
-                    <td class="currency"><input type="number" id="cost-safety" value="0" oninput="calculateAll()"></td>
-                    <td>1</td>
-                    <td class="currency" id="total-safety">0.00</td>
-                </tr>
-                <tr>
-                    <td>Pipes (e.g., Ductile Iron)</td>
-                    <td>Total length required for project</td>
-                    <td class="currency"><input type="number" id="cost-pipes" value="0" oninput="calculateAll()"></td>
-                    <td><input type="number" class="qty" id="qty-pipes" value="1" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-pipes">0.00</td>
-                </tr>
-                <tr>
-                    <td>Valves & Fittings</td>
-                    <td>Copper/Brass valves, elbows, sleeves</td>
-                    <td class="currency"><input type="number" id="cost-fittings" value="0" oninput="calculateAll()"></td>
-                    <td><input type="number" class="qty" id="qty-fittings" value="1" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-fittings">0.00</td>
-                </tr>
-                <tr>
-                    <td>Water Meters</td>
-                    <td>Quantity of meters to be installed/replaced</td>
-                    <td class="currency"><input type="number" id="cost-meters" value="0" oninput="calculateAll()"></td>
-                    <td><input type="number" class="qty" id="qty-meters" value="50" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-meters">0.00</td>
-                </tr>
-                <tr>
-                    <td>General Tools & Consumables</td>
-                    <td>Miscellaneous tools and supplies</td>
-                    <td class="currency"><input type="number" id="cost-tools" value="0" oninput="calculateAll()"></td>
-                    <td>1</td>
-                    <td class="currency" id="total-tools">0.00</td>
-                </tr>
-                <tr>
-                    <td>Soil Testing</td>
-                    <td>Per-site certified lab tests</td>
-                    <td class="currency"><input type="number" id="cost-soil" value="0" oninput="calculateAll()"></td>
-                    <td><input type="number" class="qty" id="qty-soil" value="10" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-soil">0.00</td>
-                </tr>
-                <tr>
-                    <td>Waste Disposal</td>
-                    <td>Per-site soil disposal (Variable)</td>
-                    <td class="currency"><input type="number" id="cost-waste" value="0" oninput="calculateAll()"></td>
-                    <td><input type="number" class="qty" id="qty-waste" value="50" oninput="calculateAll()"></td>
-                    <td class="currency" id="total-waste">0.00</td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="4">Total Capital & Variable Costs</td>
-                    <td class="currency" id="total-variable-costs">0.00</td>
-                </tr>
-
-                <!-- Grand Total Section -->
-                <tr class="category-header">
-                    <td colspan="5">4. Project Financial Summary</td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="4">Total Project Cost</td>
-                    <td class="currency" id="total-project-cost">738,000.00</td>
+            <tbody id="table-body">
+                <!-- Rows will be dynamically inserted here -->
+            </tbody>
+            <tfoot>
+                <tr class="total-row" style="background-color: #e5e7eb;">
+                    <td colspan="5" class="font-bold text-lg">Total Project Cost</td>
+                    <td id="total-project-cost" class="font-bold text-lg currency">0.00</td>
                 </tr>
                 <tr id="profit-loss-row">
-                    <td colspan="4">Net Profit / Loss</td>
-                    <td class="currency" id="net-profit-loss">-588,000.00</td>
+                    <td colspan="5" class="font-bold text-lg">Net Profit / Loss</td>
+                    <td id="net-profit-loss" class="font-bold text-lg currency">0.00</td>
                 </tr>
-            </tbody>
+            </tfoot>
         </table>
     </div>
 
     <script>
-        // --- CALCULATION LOGIC ---
+        const initialData = [
+            // Revenue
+            { freq: 'Revenue per Site', cat: 'Revenue', item: 'Aptor', qty: 5, price: 3200, type: 'revenue' },
+            { freq: 'Revenue per Site', cat: 'Revenue', item: 'Additional Meter', qty: 150, price: 165, type: 'revenue' },
+            // One-time Costs
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Molder', qty: 1, price: 10000, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Plastic Blocks', qty: 30, price: 105, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'LED', qty: 3, price: 3, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Extention cable', qty: 1, price: 100, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'PPE', qty: 7, price: 60, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Tablet', qty: 2, price: 5000, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Sim', qty: 2, price: 1000, type: 'cost' },
+            // Monthly Costs
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Site Engineer', qty: 1, price: 7500, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Plumber', qty: 1, price: 4500, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Site Supervisor', qty: 1, price: 4000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Labour', qty: 4, price: 3000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Machinary', item: 'JCB', qty: 1, price: 12000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Machinary', item: 'Dump Truck', qty: 1, price: 6000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Team Transport', item: 'Car & Gas', qty: 2, price: 5000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Team Transport', item: 'Van & Gas', qty: 1, price: 5000, type: 'cost' },
+            // Cost per Site
+            { freq: 'Cost per Site', cat: 'Works', item: 'Street Paving', qty: 5, price: 1000, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Harary', qty: 5, price: 50, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Valves', qty: 5, price: 1000, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Pipes Length (m)', qty: 5, price: 30, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Soil Testing', qty: 5, price: 200, type: 'cost' },
+        ];
+
         function formatCurrency(num) {
             return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function calculateAll() {
-            // --- REVENUE CALCULATION ---
-            const revenuePipePerMeter = parseFloat(document.getElementById('revenue-pipe-per-meter').value) || 0;
-            const qtyPipeMeters = parseFloat(document.getElementById('qty-pipe-meters').value) || 0;
-            const totalRevenuePipe = revenuePipePerMeter * qtyPipeMeters;
-            document.getElementById('total-revenue-pipe').textContent = formatCurrency(totalRevenuePipe);
+            let totalRevenue = 0;
+            let totalCost = 0;
 
-            const revenueWaterMeter = parseFloat(document.getElementById('revenue-water-meter').value) || 0;
-            const qtyWaterMeters = parseFloat(document.getElementById('qty-water-meters').value) || 0;
-            const totalRevenueWaterMeter = revenueWaterMeter * qtyWaterMeters;
-            document.getElementById('total-revenue-water-meter').textContent = formatCurrency(totalRevenueWaterMeter);
+            const tableBody = document.getElementById('table-body');
+            tableBody.querySelectorAll('tr').forEach((row, index) => {
+                const qtyInput = row.querySelector('.qty-input');
+                const priceInput = row.querySelector('.price-input');
+                const totalCell = row.querySelector('.total-cell');
 
-            const totalRevenue = totalRevenuePipe + totalRevenueWaterMeter;
-            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const total = qty * price;
 
+                totalCell.textContent = formatCurrency(total);
 
-            // --- RECURRING COSTS CALCULATION ---
-            const months = parseFloat(document.getElementById('months-personnel').value) || 0;
-            document.querySelectorAll('.ref-qty').forEach(el => { el.textContent = months; });
+                if (initialData[index].type === 'revenue') {
+                    totalRevenue += total;
+                } else {
+                    totalCost += total;
+                }
+            });
 
-            const costSupervisor = parseFloat(document.getElementById('cost-supervisor').value) || 0;
-            document.getElementById('total-supervisor').textContent = formatCurrency(costSupervisor * months);
-            const costPlumber = parseFloat(document.getElementById('cost-plumber').value) || 0;
-            document.getElementById('total-plumber').textContent = formatCurrency(costPlumber * months);
-            const costDriver = parseFloat(document.getElementById('cost-driver').value) || 0;
-            document.getElementById('total-driver').textContent = formatCurrency(costDriver * months);
-            const costLaborer = parseFloat(document.getElementById('cost-laborer').value) || 0;
-            document.getElementById('total-laborer').textContent = formatCurrency(costLaborer * 4 * months);
-            const costJcb = parseFloat(document.getElementById('cost-jcb').value) || 0;
-            document.getElementById('total-jcb').textContent = formatCurrency(costJcb * months);
-            const costDumpTruck = parseFloat(document.getElementById('cost-dumptruck').value) || 0;
-            document.getElementById('total-dumptruck').textContent = formatCurrency(costDumpTruck * months);
-
-            const totalRecurringCosts = (costSupervisor + costPlumber + costDriver + (costLaborer * 4) + costJcb + costDumpTruck) * months;
-            document.getElementById('total-recurring-costs').textContent = formatCurrency(totalRecurringCosts);
-            
-            // --- VARIABLE COSTS CALCULATION ---
-            const costDina = parseFloat(document.getElementById('cost-dina').value) || 0;
-            document.getElementById('total-dina').textContent = formatCurrency(costDina);
-            const costSafety = parseFloat(document.getElementById('cost-safety').value) || 0;
-            document.getElementById('total-safety').textContent = formatCurrency(costSafety);
-            const costPipes = parseFloat(document.getElementById('cost-pipes').value) || 0;
-            const qtyPipes = parseFloat(document.getElementById('qty-pipes').value) || 0;
-            document.getElementById('total-pipes').textContent = formatCurrency(costPipes * qtyPipes);
-            const costFittings = parseFloat(document.getElementById('cost-fittings').value) || 0;
-            const qtyFittings = parseFloat(document.getElementById('qty-fittings').value) || 0;
-            document.getElementById('total-fittings').textContent = formatCurrency(costFittings * qtyFittings);
-            const costMeters = parseFloat(document.getElementById('cost-meters').value) || 0;
-            const qtyMeters = parseFloat(document.getElementById('qty-meters').value) || 0;
-            document.getElementById('total-meters').textContent = formatCurrency(costMeters * qtyMeters);
-            const costTools = parseFloat(document.getElementById('cost-tools').value) || 0;
-            document.getElementById('total-tools').textContent = formatCurrency(costTools);
-            const costSoil = parseFloat(document.getElementById('cost-soil').value) || 0;
-            const qtySoil = parseFloat(document.getElementById('qty-soil').value) || 0;
-            document.getElementById('total-soil').textContent = formatCurrency(costSoil * qtySoil);
-            const costWaste = parseFloat(document.getElementById('cost-waste').value) || 0;
-            const qtyWaste = parseFloat(document.getElementById('qty-waste').value) || 0;
-            document.getElementById('total-waste').textContent = formatCurrency(costWaste * qtyWaste);
-
-            const totalVariableCosts = costDina + costSafety + (costPipes * qtyPipes) + (costFittings * qtyFittings) + (costMeters * qtyMeters) + costTools + (costSoil * qtySoil) + (costWaste * qtyWaste);
-            document.getElementById('total-variable-costs').textContent = formatCurrency(totalVariableCosts);
-
-            // --- SUMMARY CALCULATION ---
-            const totalProjectCost = totalRecurringCosts + totalVariableCosts;
-            document.getElementById('total-project-cost').textContent = formatCurrency(totalProjectCost);
-
-            const netProfitLoss = totalRevenue - totalProjectCost;
-            document.getElementById('net-profit-loss').textContent = formatCurrency(netProfitLoss);
+            const netProfitLoss = totalRevenue - totalCost;
 
             // Update summary cards
             document.getElementById('summary-revenue').textContent = 'SAR ' + formatCurrency(totalRevenue);
-            document.getElementById('summary-cost').textContent = 'SAR ' + formatCurrency(totalProjectCost);
+            document.getElementById('summary-cost').textContent = 'SAR ' + formatCurrency(totalCost);
             document.getElementById('summary-profit').textContent = 'SAR ' + formatCurrency(netProfitLoss);
 
-            // --- STYLING ---
+            // Update footer
+            document.getElementById('total-project-cost').textContent = formatCurrency(totalCost);
+            document.getElementById('net-profit-loss').textContent = formatCurrency(netProfitLoss);
+
+            // Styling for profit/loss
             const profitRow = document.getElementById('profit-loss-row');
             const summaryProfit = document.getElementById('summary-profit');
             profitRow.className = netProfitLoss >= 0 ? 'profit-row' : 'loss-row';
             summaryProfit.className = 'value ' + (netProfitLoss >= 0 ? 'net-profit' : 'net-loss');
         }
 
+        function renderTable() {
+            const tableBody = document.getElementById('table-body');
+            let lastFreq = '';
+            initialData.forEach((data, index) => {
+                if (data.freq !== lastFreq) {
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'category-header';
+                    headerRow.innerHTML = `<td colspan="6">${data.freq}</td>`;
+                    tableBody.appendChild(headerRow);
+                    lastFreq = data.freq;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.freq}</td>
+                    <td>${data.cat}</td>
+                    <td>${data.item}</td>
+                    <td><input type="number" class="qty-input" value="${data.qty}" oninput="calculateAll()"></td>
+                    <td class="currency"><input type="number" class="price-input" value="${data.price}" oninput="calculateAll()"></td>
+                    <td class="currency total-cell">0.00</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
         // --- EVENT LISTENERS ---
-        document.getElementById('print-btn').addEventListener('click', () => {
-            window.print();
-        });
+        document.getElementById('print-btn').addEventListener('click', () => { window.print(); });
 
         document.getElementById('export-btn').addEventListener('click', () => {
             const table = document.getElementById('financial-table');
             let csv = [];
             
-            // Add summary data first
             const totalRevenue = document.getElementById('summary-revenue').textContent;
             const totalCost = document.getElementById('summary-cost').textContent;
             const netProfit = document.getElementById('summary-profit').textContent;
@@ -476,20 +324,20 @@
             csv.push(`"Total Revenue","${totalRevenue}"`);
             csv.push(`"Total Cost","${totalCost}"`);
             csv.push(`"Net Profit / Loss","${netProfit}"`);
-            csv.push(''); // Add a blank line for spacing
+            csv.push('');
+            csv.push(`"Frequency","Category","Item / Role","Qty","Unit Price / Revenue","Total"`);
 
-            for (const row of table.rows) {
+            document.getElementById('table-body').querySelectorAll('tr:not(.category-header)').forEach(row => {
                 const rowData = [];
-                for (const cell of row.cells) {
-                    let cellText = cell.innerText;
-                    if (cell.querySelector('input[type="number"]')) {
-                        cellText = cell.querySelector('input[type="number"]').value;
-                    }
-                    // Escape double quotes by doubling them and wrap the content in quotes
-                    rowData.push(`"${cellText.replace(/"/g, '""')}"`);
-                }
+                const cells = row.cells;
+                rowData.push(`"${cells[0].innerText}"`);
+                rowData.push(`"${cells[1].innerText}"`);
+                rowData.push(`"${cells[2].innerText}"`);
+                rowData.push(`"${cells[3].querySelector('input').value}"`);
+                rowData.push(`"${cells[4].querySelector('input').value}"`);
+                rowData.push(`"${cells[5].innerText.replace(/,/g, '')}"`); // Remove commas for CSV
                 csv.push(rowData.join(','));
-            }
+            });
 
             const csvContent = "data:text/csv;charset=utf-8," + csv.join('\n');
             const encodedUri = encodeURI(csvContent);
@@ -501,7 +349,10 @@
             document.body.removeChild(link);
         });
 
-        window.onload = calculateAll;
+        window.onload = () => {
+            renderTable();
+            calculateAll();
+        };
     </script>
 
 </body>
