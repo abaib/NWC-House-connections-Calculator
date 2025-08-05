@@ -155,6 +155,7 @@
         <div class="table-header">
             <h1>NWC Project Financial Projection</h1>
             <p>Enter project values to calculate revenue, costs, and profit. All values in Saudi Riyal (SAR).</p>
+            <p class="text-sm text-green-400 mt-1">Your edits are saved automatically in your browser.</p>
         </div>
 
         <div class="actions-bar">
@@ -190,7 +191,7 @@
                     <th>Category</th>
                     <th>Item / Role</th>
                     <th>Qty</th>
-                    <th>Unit Price / Revenue</th>
+                    <th>Unit Price</th>
                     <th>Total</th>
                 </tr>
             </thead>
@@ -211,9 +212,9 @@
     </div>
 
     <script>
-        const initialData = [
+        const defaultData = [
             // Revenue
-            { freq: 'Revenue per Site', cat: 'Revenue', item: 'Aptor', qty: 5, price: 3200, type: 'revenue' },
+            { freq: 'Revenue per Site', cat: 'Revenue', item: 'Apator water meter', qty: 5, price: 3200, type: 'revenue' },
             { freq: 'Revenue per Site', cat: 'Revenue', item: 'Additional Meter', qty: 150, price: 165, type: 'revenue' },
             // One-time Costs
             { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Molder', qty: 1, price: 10000, type: 'cost' },
@@ -239,9 +240,31 @@
             { freq: 'Cost per Site', cat: 'Works', item: 'Pipes Length (m)', qty: 5, price: 30, type: 'cost' },
             { freq: 'Cost per Site', cat: 'Works', item: 'Soil Testing', qty: 5, price: 200, type: 'cost' },
         ];
+        
+        let currentData = [];
 
         function formatCurrency(num) {
             return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function saveData() {
+            const dataToSave = [];
+            const tableBody = document.getElementById('table-body');
+            tableBody.querySelectorAll('tr[data-type]').forEach(row => {
+                const qtyInput = row.querySelector('.qty-input');
+                const priceInput = row.querySelector('.price-input');
+                
+                const rowData = {
+                    freq: row.cells[0].innerText,
+                    cat: row.cells[1].innerText,
+                    item: row.cells[2].innerText,
+                    qty: parseFloat(qtyInput.value) || 0,
+                    price: parseFloat(priceInput.value) || 0,
+                    type: row.dataset.type,
+                };
+                dataToSave.push(rowData);
+            });
+            localStorage.setItem('nwcProjectData', JSON.stringify(dataToSave));
         }
 
         function calculateAll() {
@@ -249,13 +272,11 @@
             let totalCost = 0;
 
             const tableBody = document.getElementById('table-body');
-            // Select only data rows, not category headers
             tableBody.querySelectorAll('tr[data-type]').forEach(row => {
                 const qtyInput = row.querySelector('.qty-input');
                 const priceInput = row.querySelector('.price-input');
                 const totalCell = row.querySelector('.total-cell');
 
-                // This check is important, although the selector should prevent this
                 if (!qtyInput || !priceInput) return;
 
                 const qty = parseFloat(qtyInput.value) || 0;
@@ -273,27 +294,26 @@
 
             const netProfitLoss = totalRevenue - totalCost;
 
-            // Update summary cards
             document.getElementById('summary-revenue').textContent = 'SAR ' + formatCurrency(totalRevenue);
             document.getElementById('summary-cost').textContent = 'SAR ' + formatCurrency(totalCost);
             document.getElementById('summary-profit').textContent = 'SAR ' + formatCurrency(netProfitLoss);
 
-            // Update footer
             document.getElementById('total-project-cost').textContent = formatCurrency(totalCost);
             document.getElementById('net-profit-loss').textContent = formatCurrency(netProfitLoss);
 
-            // Styling for profit/loss
             const profitRow = document.getElementById('profit-loss-row');
             const summaryProfit = document.getElementById('summary-profit');
             profitRow.className = netProfitLoss >= 0 ? 'profit-row' : 'loss-row';
             summaryProfit.className = 'value ' + (netProfitLoss >= 0 ? 'net-profit' : 'net-loss');
+
+            saveData(); // Save data on every calculation
         }
 
         function renderTable() {
             const tableBody = document.getElementById('table-body');
-            tableBody.innerHTML = ''; // Clear existing table rows
+            tableBody.innerHTML = ''; 
             let lastFreq = '';
-            initialData.forEach((data, index) => {
+            currentData.forEach((data, index) => {
                 if (data.freq !== lastFreq) {
                     const headerRow = document.createElement('tr');
                     headerRow.className = 'category-header';
@@ -303,7 +323,6 @@
                 }
 
                 const row = document.createElement('tr');
-                // Add data-type to the row itself
                 row.dataset.type = data.type;
                 
                 row.innerHTML = `
@@ -318,11 +337,18 @@
             });
         }
         
-        // --- EVENT LISTENERS ---
+        function loadData() {
+            const savedData = localStorage.getItem('nwcProjectData');
+            if (savedData) {
+                currentData = JSON.parse(savedData);
+            } else {
+                currentData = defaultData;
+            }
+        }
+
         document.getElementById('print-btn').addEventListener('click', () => { window.print(); });
 
         document.getElementById('export-btn').addEventListener('click', () => {
-            const table = document.getElementById('financial-table');
             let csv = [];
             
             const totalRevenue = document.getElementById('summary-revenue').textContent;
@@ -333,7 +359,7 @@
             csv.push(`"Total Cost","${totalCost}"`);
             csv.push(`"Net Profit / Loss","${netProfit}"`);
             csv.push('');
-            csv.push(`"Frequency","Category","Item / Role","Qty","Unit Price / Revenue","Total"`);
+            csv.push(`"Frequency","Category","Item / Role","Qty","Unit Price","Total"`);
 
             document.getElementById('table-body').querySelectorAll('tr:not(.category-header)').forEach(row => {
                 const rowData = [];
@@ -343,7 +369,7 @@
                 rowData.push(`"${cells[2].innerText}"`);
                 rowData.push(`"${cells[3].querySelector('input').value}"`);
                 rowData.push(`"${cells[4].querySelector('input').value}"`);
-                rowData.push(`"${cells[5].innerText.replace(/,/g, '')}"`); // Remove commas for CSV
+                rowData.push(`"${cells[5].innerText.replace(/,/g, '')}"`);
                 csv.push(rowData.join(','));
             });
 
@@ -358,6 +384,7 @@
         });
 
         window.onload = () => {
+            loadData();
             renderTable();
             calculateAll();
         };
