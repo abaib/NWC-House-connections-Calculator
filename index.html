@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NWC Project Financial Projection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .table-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+        }
+        .table-header {
+            background-color: #1f2937;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #374151;
+        }
+        .table-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .table-header p {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+        .info-bar {
+            display: flex;
+            gap: 1.5rem;
+            padding: 0.5rem 1.5rem;
+            background-color: #374151;
+            color: #d1d5db;
+            font-size: 0.875rem;
+        }
+        .info-bar input {
+            background: transparent;
+            border: none;
+            color: white;
+        }
+        .actions-bar {
+            background-color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: #f9fafb;
+            color: #374151;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .action-btn:hover {
+            background-color: #f3f4f6;
+        }
+        .action-btn.primary {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .action-btn.primary:hover {
+            background-color: #1d4ed8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .category-header td {
+            background-color: #e5e7eb;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .total-row td {
+            font-weight: 700;
+            background-color: #f9fafb;
+        }
+        .profit-row td {
+            background-color: #d1fae5;
+            color: #065f46;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+        .loss-row td {
+            background-color: #fee2e2;
+            color: #991b1b;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100px;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            text-align: right;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        .currency::before {
+            content: 'SAR ';
+            color: #6b7280;
+        }
+        .summary-card {
+            background-color: #f9fafb;
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+        }
+        .summary-item .label {
+            font-size: 0.875rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        .summary-item .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+        .summary-item .value.total-revenue { color: #16a34a; }
+        .summary-item .value.total-cost { color: #dc2626; }
+        .summary-item .value.net-profit { color: #059669; }
+        .summary-item .value.net-loss { color: #b91c1c; }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        @media print {
+            body { background-color: #fff; }
+            .table-container { margin: 0; box-shadow: none; border: none; }
+            .table-header, .actions-bar, .summary-card, .modal-overlay { display: none; }
+            input[type="number"] { border: none; padding: 0; -moz-appearance: textfield; }
+            input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+            .currency::before { content: ''; }
+            td, th { padding: 0.5rem; font-size: 10pt; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h1>NWC Project Financial Projection</h1>
+            <p>Enter project values to calculate revenue, costs, and profit. All values in Saudi Riyal (SAR).</p>
+            <p class="text-sm text-green-400 mt-1">Data is synced in real-time for all users.</p>
+        </div>
+        
+        <div class="info-bar">
+            <div>Date: <input type="text" id="record-date" style="width: 120px;" readonly></div>
+            <div>Location: <input type="text" id="record-location" style="width: 200px;" placeholder="Not captured" readonly></div>
+            <button id="get-location-btn" class="action-btn" style="background-color: #4b5563; padding: 0.25rem 0.75rem;">Get Location</button>
+        </div>
+
+        <div class="actions-bar">
+            <button id="save-record-btn" class="action-btn primary">Save Record</button>
+            <button id="view-records-btn" class="action-btn">View Saved Records</button>
+            <button id="export-btn" class="action-btn">Export to Excel (.csv)</button>
+            <button id="print-btn" class="action-btn">Print to PDF</button>
+        </div>
+
+        <div id="summary" class="summary-card">
+            <div class="summary-item">
+                <div class="label">Total Revenue</div>
+                <div id="summary-revenue" class="value total-revenue">SAR 0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Total Cost</div>
+                <div id="summary-cost" class="value total-cost">SAR 0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Net Profit / Loss</div>
+                <div id="summary-profit" class="value">SAR 0.00</div>
+            </div>
+        </div>
+
+        <table id="financial-table">
+            <thead>
+                <tr>
+                    <th>Frequency</th>
+                    <th>Category</th>
+                    <th>Item / Role</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <tr><td colspan="6" class="text-center p-8">Connecting to database...</td></tr>
+            </tbody>
+            <tfoot>
+                <tr class="total-row" style="background-color: #e5e7eb;">
+                    <td colspan="5" class="font-bold text-lg">Total Project Cost</td>
+                    <td id="total-project-cost" class="font-bold text-lg currency">0.00</td>
+                </tr>
+                <tr id="profit-loss-row">
+                    <td colspan="5" class="font-bold text-lg">Net Profit / Loss</td>
+                    <td id="net-profit-loss" class="font-bold text-lg currency">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Modal for Saved Records -->
+    <div id="records-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Saved Records</h2>
+                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+            </div>
+            <div id="records-list">
+                <!-- Saved records will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURATION ---
+        // These global variables are provided by the environment.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyB_PWfver0TH_a5vtTIRXYZj1kMRiEKH08",
+          authDomain: "nwc-project-db.firebaseapp.com",
+          projectId: "nwc-project-db",
+          storageBucket: "nwc-project-db.firebasestorage.app",
+          messagingSenderId: "603492098201",
+          appId: "1:603492098201:web:ba6e9ed8519534cc0e1808",
+          measurementId: "G-E7JBKV3HJQ"
+        };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+        
+        let db, auth;
+        let currentData = [];
+        let projectionDocRef, savedRecordsColRef;
+
+        const defaultData = [
+            { freq: 'Revenue per Site', cat: 'Revenue', item: 'Apator water meter', qty: 5, price: 3200, type: 'revenue' },
+            { freq: 'Revenue per Site', cat: 'Revenue', item: 'Additional Meter', qty: 150, price: 165, type: 'revenue' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Molder', qty: 1, price: 10000, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Plastic Blocks', qty: 30, price: 105, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'LED', qty: 3, price: 3, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Extention cable', qty: 1, price: 100, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'PPE', qty: 7, price: 60, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Tablet', qty: 2, price: 5000, type: 'cost' },
+            { freq: 'One time Cost', cat: 'Tools & Equipments', item: 'Sim', qty: 2, price: 1000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Site Engineer', qty: 1, price: 7500, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Plumber', qty: 1, price: 4500, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Site Supervisor', qty: 1, price: 4000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Salaries', item: 'Labour', qty: 4, price: 3000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Machinary', item: 'JCB', qty: 1, price: 12000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Machinary', item: 'Dump Truck', qty: 1, price: 6000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Team Transport', item: 'Car & Gas', qty: 2, price: 5000, type: 'cost' },
+            { freq: 'Monthly Cost', cat: 'Team Transport', item: 'Van & Gas', qty: 1, price: 5000, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Street Paving', qty: 5, price: 1000, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Harary', qty: 5, price: 50, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Valves', qty: 5, price: 1000, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Pipes Length (m)', qty: 5, price: 30, type: 'cost' },
+            { freq: 'Cost per Site', cat: 'Works', item: 'Soil Testing', qty: 5, price: 200, type: 'cost' },
+        ];
+
+        // --- UTILITY FUNCTIONS ---
+        function formatCurrency(num) {
+            return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // --- DATA & UI FUNCTIONS ---
+        async function updateDataInFirestore() {
+            const dataToSave = [];
+            document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
+                 dataToSave.push({
+                    freq: row.cells[0].innerText,
+                    cat: row.cells[1].innerText,
+                    item: row.cells[2].innerText,
+                    qty: parseFloat(row.querySelector('.qty-input').value) || 0,
+                    price: parseFloat(row.querySelector('.price-input').value) || 0,
+                    type: row.dataset.type,
+                });
+            });
+            try {
+                await setDoc(projectionDocRef, { data: dataToSave });
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                alert("Could not save changes to the database.");
+            }
+        }
+
+        function calculateAll() {
+            let totalRevenue = 0;
+            let totalCost = 0;
+            document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                const total = qty * price;
+                row.querySelector('.total-cell').textContent = formatCurrency(total);
+                if (row.dataset.type === 'revenue') totalRevenue += total;
+                else totalCost += total;
+            });
+            const netProfitLoss = totalRevenue - totalCost;
+            document.getElementById('summary-revenue').textContent = 'SAR ' + formatCurrency(totalRevenue);
+            document.getElementById('summary-cost').textContent = 'SAR ' + formatCurrency(totalCost);
+            document.getElementById('summary-profit').textContent = 'SAR ' + formatCurrency(netProfitLoss);
+            document.getElementById('total-project-cost').textContent = formatCurrency(totalCost);
+            document.getElementById('net-profit-loss').textContent = formatCurrency(netProfitLoss);
+            const profitRow = document.getElementById('profit-loss-row');
+            const summaryProfit = document.getElementById('summary-profit');
+            profitRow.className = netProfitLoss >= 0 ? 'profit-row' : 'loss-row';
+            summaryProfit.className = 'value ' + (netProfitLoss >= 0 ? 'net-profit' : 'net-loss');
+        }
+
+        function renderTable(data) {
+            currentData = data;
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = ''; 
+            let lastFreq = '';
+            currentData.forEach(d => {
+                if (d.freq !== lastFreq) {
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'category-header';
+                    headerRow.innerHTML = `<td colspan="6">${d.freq}</td>`;
+                    tableBody.appendChild(headerRow);
+                    lastFreq = d.freq;
+                }
+                const row = document.createElement('tr');
+                row.dataset.type = d.type;
+                row.innerHTML = `
+                    <td>${d.freq}</td>
+                    <td>${d.cat}</td>
+                    <td>${d.item}</td>
+                    <td><input type="number" class="qty-input" value="${d.qty}" oninput="updateDataInFirestore()"></td>
+                    <td class="currency"><input type="number" class="price-input" value="${d.price}" oninput="updateDataInFirestore()"></td>
+                    <td class="currency total-cell">0.00</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            calculateAll();
+        }
+
+        // --- EVENT HANDLERS & SETUP ---
+        function setupEventListeners() {
+            document.getElementById('print-btn').addEventListener('click', () => window.print());
+            document.getElementById('export-btn').addEventListener('click', exportToCsv);
+            document.getElementById('get-location-btn').addEventListener('click', getLocation);
+            document.getElementById('save-record-btn').addEventListener('click', saveRecord);
+            document.getElementById('view-records-btn').addEventListener('click', openRecordsModal);
+            document.getElementById('modal-close-btn').addEventListener('click', closeRecordsModal);
+        }
+
+        function setDate() {
+            document.getElementById('record-date').value = new Date().toLocaleDateString('en-CA');
+        }
+
+        function getLocation() {
+            const locationField = document.getElementById('record-location');
+            if (navigator.geolocation) {
+                locationField.value = "Fetching...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(5);
+                        const lon = position.coords.longitude.toFixed(5);
+                        locationField.value = `${lat}, ${lon}`;
+                    },
+                    () => { locationField.value = "Unable to retrieve location."; }
+                );
+            } else {
+                locationField.value = "Geolocation not supported.";
+            }
+        }
+
+        async function saveRecord() {
+            const recordName = prompt("Enter a name for this record:", `Record ${new Date().toLocaleString()}`);
+            if (!recordName) return;
+
+            const recordData = [];
+            document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
+                recordData.push({
+                    freq: row.cells[0].innerText, cat: row.cells[1].innerText, item: row.cells[2].innerText,
+                    qty: parseFloat(row.querySelector('.qty-input').value) || 0,
+                    price: parseFloat(row.querySelector('.price-input').value) || 0,
+                    type: row.dataset.type,
+                });
+            });
+
+            try {
+                await addDoc(savedRecordsColRef, { name: recordName, data: recordData, createdAt: new Date() });
+                alert(`Record "${recordName}" saved.`);
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Failed to save record.");
+            }
+        }
+
+        async function openRecordsModal() {
+            const listContainer = document.getElementById('records-list');
+            listContainer.innerHTML = '<p>Loading records...</p>';
+            document.getElementById('records-modal').classList.remove('hidden');
+
+            try {
+                const querySnapshot = await getDocs(savedRecordsColRef);
+                listContainer.innerHTML = '';
+                if (querySnapshot.empty) {
+                    listContainer.innerHTML = '<p>No saved records found.</p>';
+                } else {
+                    querySnapshot.forEach(doc => {
+                        const record = doc.data();
+                        const item = document.createElement('div');
+                        item.className = 'record-item';
+                        item.innerHTML = `
+                            <span>${record.name}</span>
+                            <div class="flex gap-2">
+                                <button class="action-btn" onclick="window.loadRecord('${doc.id}')">Load</button>
+                                <button class="action-btn" style="background-color: #ef4444; color: white;" onclick="window.deleteRecord('${doc.id}')">Delete</button>
+                            </div>
+                        `;
+                        listContainer.appendChild(item);
+                    });
+                }
+            } catch (error) {
+                console.error("Error getting records: ", error);
+                listContainer.innerHTML = '<p>Could not load records.</p>';
+            }
+        }
+
+        function closeRecordsModal() {
+            document.getElementById('records-modal').classList.add('hidden');
+        }
+
+        window.loadRecord = async (id) => {
+            try {
+                const docRef = doc(savedRecordsColRef, id);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const recordToLoad = docSnap.data();
+                    await setDoc(projectionDocRef, { data: recordToLoad.data });
+                    closeRecordsModal();
+                    alert(`Record "${recordToLoad.name}" loaded.`);
+                }
+            } catch (error) {
+                console.error("Error loading record: ", error);
+                alert("Failed to load record.");
+            }
+        };
+
+        window.deleteRecord = async (id) => {
+            if (!confirm("Are you sure you want to delete this record?")) return;
+            try {
+                const docRef = doc(savedRecordsColRef, id);
+                await deleteDoc(docRef);
+                openRecordsModal(); // Refresh the modal list
+            } catch (error) {
+                console.error("Error deleting record: ", error);
+                alert("Failed to delete record.");
+            }
+        };
+        
+        function exportToCsv() {
+            let csv = [];
+            const totalRevenue = document.getElementById('summary-revenue').textContent;
+            const totalCost = document.getElementById('summary-cost').textContent;
+            const netProfit = document.getElementById('summary-profit').textContent;
+            csv.push(`"NWC Project Financial Summary"`);
+            csv.push(`"Date","${document.getElementById('record-date').value}"`);
+            csv.push(`"Location","${document.getElementById('record-location').value}"`);
+            csv.push(`"Total Revenue","${totalRevenue}"`);
+            csv.push(`"Total Cost","${totalCost}"`);
+            csv.push(`"Net Profit / Loss","${netProfit}"`);
+            csv.push('');
+            csv.push(`"Frequency","Category","Item / Role","Qty","Unit Price","Total"`);
+            document.getElementById('table-body').querySelectorAll('tr:not(.category-header)').forEach(row => {
+                const rowData = [
+                    `"${row.cells[0].innerText}"`, `"${row.cells[1].innerText}"`, `"${row.cells[2].innerText}"`,
+                    `"${row.cells[3].querySelector('input').value}"`, `"${row.cells[4].querySelector('input').value}"`,
+                    `"${row.cells[5].innerText.replace(/,/g, '')}"`
+                ];
+                csv.push(rowData.join(','));
+            });
+            const csvContent = "data:text/csv;charset=utf-8," + csv.join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "NWC_Financial_Projection.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- INITIALIZATION ---
+        async function main() {
+            // 1. Initialize Firebase
+            if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Firebase configuration is missing. App cannot start.</td></tr>';
+                return;
+            }
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+            } catch (error) {
+                 document.getElementById('table-body').innerHTML = `<tr><td colspan="6" class="text-center p-8 text-red-500">Firebase initialization failed: ${error.message}</td></tr>`;
+                 return;
+            }
+
+            // 2. Authenticate User
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Authentication failed. Cannot connect to the database.</td></tr>';
+                return;
+            }
+            
+            // 3. Define Firestore references
+            const basePath = `artifacts/${appId}/public/data`;
+            projectionDocRef = doc(db, `${basePath}/live_projection/current_state`);
+            savedRecordsColRef = collection(db, `${basePath}/saved_records`);
+
+            // 4. Setup real-time listener
+            onSnapshot(projectionDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    renderTable(docSnap.data().data);
+                } else {
+                    // If document doesn't exist, create it with default data
+                    setDoc(projectionDocRef, { data: defaultData }).then(() => {
+                        renderTable(defaultData);
+                    });
+                }
+            }, (error) => {
+                console.error("Error listening to document:", error);
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Error connecting to the database. Please check your connection and refresh.</td></tr>';
+            });
+
+            // 5. Setup UI
+            setupEventListeners();
+            setDate();
+        }
+
+        main();
+
+    </script>
+
+</body>
+</html>
