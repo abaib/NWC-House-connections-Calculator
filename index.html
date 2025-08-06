@@ -12,34 +12,25 @@
             background-color: #f3f4f6;
         }
         .table-container {
+            width: 100%;
             max-width: 1200px;
-            margin: 2rem auto;
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            overflow: hidden;
+            margin: 1rem auto;
+        }
+        @media (min-width: 640px) {
+            .table-container {
+                margin: 2rem auto;
+            }
+        }
+        .table-wrapper {
+            overflow-x: auto;
         }
         .table-header {
             background-color: #1f2937;
             color: white;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #374151;
-        }
-        .table-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        .table-header p {
-            font-size: 0.875rem;
-            color: #9ca3af;
         }
         .info-bar {
-            display: flex;
-            gap: 1.5rem;
-            padding: 0.5rem 1.5rem;
             background-color: #374151;
             color: #d1d5db;
-            font-size: 0.875rem;
         }
         .info-bar input {
             background: transparent;
@@ -48,11 +39,6 @@
         }
         .actions-bar {
             background-color: #fff;
-            padding: 0.75rem 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
         }
         .action-btn {
             display: inline-flex;
@@ -80,12 +66,14 @@
         }
         table {
             width: 100%;
+            min-width: 800px; /* Ensures table has a minimum width before scrolling */
             border-collapse: collapse;
         }
         th, td {
             padding: 0.75rem 1.5rem;
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
         }
         th {
             background-color: #f9fafb;
@@ -135,15 +123,6 @@
         }
         .summary-card {
             background-color: #f9fafb;
-            padding: 1.5rem;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        .summary-item {
-            text-align: center;
-            padding: 1rem;
         }
         .summary-item .label {
             font-size: 0.875rem;
@@ -224,66 +203,68 @@
 </head>
 <body>
 
-    <div class="table-container">
-        <div class="table-header">
-            <h1>NWC Project Financial Projection</h1>
-            <p>Enter project values to calculate revenue, costs, and profit. All values in Saudi Riyal (SAR).</p>
+    <div class="table-container bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="table-header p-4 sm:p-6">
+            <h1 class="text-xl sm:text-2xl font-bold">NWC Project Financial Projection</h1>
+            <p class="text-sm mt-1">Enter project values to calculate revenue, costs, and profit. All values in Saudi Riyal (SAR).</p>
             <p class="text-sm text-green-400 mt-1">Data is synced in real-time for all users.</p>
         </div>
         
-        <div class="info-bar">
-            <div>Date: <input type="text" id="record-date" style="width: 120px;" readonly></div>
-            <div>Location: <input type="text" id="record-location" style="width: 200px;" placeholder="Not captured" readonly></div>
-            <button id="get-location-btn" class="action-btn" style="background-color: #4b5563; padding: 0.25rem 0.75rem;">Get Location</button>
+        <div class="info-bar flex flex-wrap items-center gap-4 p-3 sm:p-2">
+            <div>Date: <input type="text" id="record-date" class="w-28" readonly></div>
+            <div class="flex items-center gap-2">Location: <input type="text" id="record-location" class="w-40" placeholder="Not captured" readonly></div>
+            <button id="get-location-btn" class="action-btn !bg-gray-200 !text-gray-800 hover:!bg-gray-300 !py-1 !px-3">Get Location</button>
         </div>
 
-        <div class="actions-bar">
+        <div class="actions-bar flex flex-wrap items-center gap-2 p-3 sm:p-4">
             <button id="save-record-btn" class="action-btn primary">Save Record</button>
             <button id="view-records-btn" class="action-btn">View Saved Records</button>
             <button id="export-btn" class="action-btn">Export to Excel (.csv)</button>
             <button id="print-btn" class="action-btn">Print to PDF</button>
         </div>
 
-        <div id="summary" class="summary-card">
-            <div class="summary-item">
+        <div id="summary" class="summary-card grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 border-b border-gray-200">
+            <div class="summary-item text-center p-4">
                 <div class="label">Total Revenue</div>
                 <div id="summary-revenue" class="value total-revenue">SAR 0.00</div>
             </div>
-            <div class="summary-item">
+            <div class="summary-item text-center p-4">
                 <div class="label">Total Cost</div>
                 <div id="summary-cost" class="value total-cost">SAR 0.00</div>
             </div>
-            <div class="summary-item">
+            <div class="summary-item text-center p-4">
                 <div class="label">Net Profit / Loss</div>
                 <div id="summary-profit" class="value">SAR 0.00</div>
             </div>
         </div>
-
-        <table id="financial-table">
-            <thead>
-                <tr>
-                    <th>Frequency</th>
-                    <th>Category</th>
-                    <th>Item / Role</th>
-                    <th>Qty</th>
-                    <th>Unit Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <tr><td colspan="6" class="text-center p-8">Connecting to database...</td></tr>
-            </tbody>
-            <tfoot>
-                <tr class="total-row" style="background-color: #e5e7eb;">
-                    <td colspan="5" class="font-bold text-lg">Total Project Cost</td>
-                    <td id="total-project-cost" class="font-bold text-lg currency">0.00</td>
-                </tr>
-                <tr id="profit-loss-row">
-                    <td colspan="5" class="font-bold text-lg">Net Profit / Loss</td>
-                    <td id="net-profit-loss" class="font-bold text-lg currency">0.00</td>
-                </tr>
-            </tfoot>
-        </table>
+        
+        <div class="table-wrapper">
+            <table id="financial-table">
+                <thead>
+                    <tr>
+                        <th>Frequency</th>
+                        <th>Category</th>
+                        <th>Item / Role</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td colspan="6" class="text-center p-8">Connecting to database...</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total-row" style="background-color: #e5e7eb;">
+                        <td colspan="5" class="font-bold text-lg">Total Project Cost</td>
+                        <td id="total-project-cost" class="font-bold text-lg currency">0.00</td>
+                    </tr>
+                    <tr id="profit-loss-row">
+                        <td colspan="5" class="font-bold text-lg">Net Profit / Loss</td>
+                        <td id="net-profit-loss" class="font-bold text-lg currency">0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
 
     <!-- Modal for Saved Records -->
@@ -350,7 +331,6 @@
         }
 
         // --- DATA & UI FUNCTIONS ---
-        // This function is now only responsible for updating the database.
         async function updateDataInFirestore() {
             const dataToSave = [];
             document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
@@ -371,7 +351,6 @@
             }
         }
         
-        // This function is called on every input to provide immediate feedback.
         function handleLocalInput() {
             calculateAll();
             updateDataInFirestore();
@@ -609,7 +588,7 @@
 
             // 4. Setup real-time listener
             onSnapshot(projectionDocRef, (docSnap) => {
-                // If the snapshot has pending writes, it's a local change.
+                // If the snapshot has pending writes, it's a local change from this client.
                 // The local UI is already updated, so we skip the full re-render to avoid losing focus.
                 if (docSnap.metadata.hasPendingWrites) {
                     return;
