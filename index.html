@@ -350,10 +350,8 @@
         }
 
         // --- DATA & UI FUNCTIONS ---
+        // This function is now only responsible for updating the database.
         async function updateDataInFirestore() {
-            // This function now also recalculates the UI totals.
-            calculateAll();
-
             const dataToSave = [];
             document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
                  dataToSave.push({
@@ -366,16 +364,19 @@
                 });
             });
             try {
-                // Use a debounce mechanism to avoid too many writes in a short time if needed,
-                // but for this app, direct writing is fine.
                 await setDoc(projectionDocRef, { data: dataToSave });
             } catch (error) {
                 console.error("Error updating document: ", error);
                 alert("Could not save changes to the database.");
             }
         }
-        // Expose the function to the global scope so inline oninput can call it.
-        window.updateDataInFirestore = updateDataInFirestore;
+        
+        // This function is called on every input to provide immediate feedback.
+        function handleLocalInput() {
+            calculateAll();
+            updateDataInFirestore();
+        }
+        window.handleLocalInput = handleLocalInput;
 
         function calculateAll() {
             let totalRevenue = 0;
@@ -419,8 +420,8 @@
                     <td>${d.freq}</td>
                     <td>${d.cat}</td>
                     <td>${d.item}</td>
-                    <td><input type="number" class="qty-input" value="${d.qty}" oninput="window.updateDataInFirestore()"></td>
-                    <td class="currency"><input type="number" class="price-input" value="${d.price}" oninput="window.updateDataInFirestore()"></td>
+                    <td><input type="number" class="qty-input" value="${d.qty}" oninput="window.handleLocalInput()"></td>
+                    <td class="currency"><input type="number" class="price-input" value="${d.price}" oninput="window.handleLocalInput()"></td>
                     <td class="currency total-cell">0.00</td>
                 `;
                 tableBody.appendChild(row);
@@ -608,6 +609,12 @@
 
             // 4. Setup real-time listener
             onSnapshot(projectionDocRef, (docSnap) => {
+                // If the snapshot has pending writes, it's a local change.
+                // The local UI is already updated, so we skip the full re-render to avoid losing focus.
+                if (docSnap.metadata.hasPendingWrites) {
+                    return;
+                }
+
                 if (docSnap.exists()) {
                     renderTable(docSnap.data().data);
                 } else {
