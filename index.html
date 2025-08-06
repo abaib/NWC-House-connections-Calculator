@@ -351,6 +351,9 @@
 
         // --- DATA & UI FUNCTIONS ---
         async function updateDataInFirestore() {
+            // This function now also recalculates the UI totals.
+            calculateAll();
+
             const dataToSave = [];
             document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
                  dataToSave.push({
@@ -363,12 +366,16 @@
                 });
             });
             try {
+                // Use a debounce mechanism to avoid too many writes in a short time if needed,
+                // but for this app, direct writing is fine.
                 await setDoc(projectionDocRef, { data: dataToSave });
             } catch (error) {
                 console.error("Error updating document: ", error);
                 alert("Could not save changes to the database.");
             }
         }
+        // Expose the function to the global scope so inline oninput can call it.
+        window.updateDataInFirestore = updateDataInFirestore;
 
         function calculateAll() {
             let totalRevenue = 0;
@@ -412,8 +419,8 @@
                     <td>${d.freq}</td>
                     <td>${d.cat}</td>
                     <td>${d.item}</td>
-                    <td><input type="number" class="qty-input" value="${d.qty}" oninput="updateDataInFirestore()"></td>
-                    <td class="currency"><input type="number" class="price-input" value="${d.price}" oninput="updateDataInFirestore()"></td>
+                    <td><input type="number" class="qty-input" value="${d.qty}" oninput="window.updateDataInFirestore()"></td>
+                    <td class="currency"><input type="number" class="price-input" value="${d.price}" oninput="window.updateDataInFirestore()"></td>
                     <td class="currency total-cell">0.00</td>
                 `;
                 tableBody.appendChild(row);
