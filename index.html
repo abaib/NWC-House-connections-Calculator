@@ -66,8 +66,12 @@
         }
         table {
             width: 100%;
-            min-width: 800px; /* Ensures table has a minimum width before scrolling */
+            min-width: 700px; /* Ensures table has a minimum width before scrolling */
             border-collapse: collapse;
+        }
+        /* Hide the first column (Frequency) */
+        th:first-child, td:first-child {
+            display: none;
         }
         th, td {
             padding: 0.75rem 1.5rem;
@@ -104,7 +108,7 @@
             font-size: 1.125rem;
             font-weight: 700;
         }
-        input[type="number"], input[type="text"] {
+        input[type="number"], input[type="text"], input[type="password"] {
             width: 100px;
             padding: 0.5rem;
             border: 1px solid #d1d5db;
@@ -112,7 +116,7 @@
             text-align: right;
             transition: border-color 0.2s;
         }
-        input[type="number"]:focus, input[type="text"]:focus {
+        input[type="number"]:focus, input[type="text"]:focus, input[type="password"]:focus {
             outline: none;
             border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
@@ -139,14 +143,14 @@
         .summary-item .value.net-profit { color: #059669; }
         .summary-item .value.net-loss { color: #b91c1c; }
         
-        /* Modal Styles */
-        .modal-overlay {
+        /* Modal & Login Styles */
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -161,39 +165,19 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-        }
-        .modal-header h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        .modal-close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .record-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .record-item:last-child {
-            border-bottom: none;
+        .login-box {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
         @media print {
             body { background-color: #fff; }
             .table-container { margin: 0; box-shadow: none; border: none; }
-            .table-header, .actions-bar, .summary-card, .modal-overlay { display: none; }
+            .table-header, .actions-bar, .summary-card, .overlay { display: none; }
             input[type="number"] { border: none; padding: 0; -moz-appearance: textfield; }
             input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
             .currency::before { content: ''; }
@@ -203,22 +187,41 @@
 </head>
 <body>
 
-    <div class="table-container bg-white rounded-lg shadow-lg overflow-hidden">
+    <div id="login-overlay" class="overlay">
+        <div class="login-box">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Project Login</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" class="mt-1 block w-full !text-left">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" class="mt-1 block w-full !text-left">
+                </div>
+                <p id="login-error" class="text-sm text-red-600 hidden">Invalid username or password.</p>
+                <button id="login-btn" class="w-full action-btn primary justify-center !py-2.5 !text-base">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="table-container bg-white rounded-lg shadow-lg overflow-hidden hidden">
         <div class="table-header p-4 sm:p-6">
             <h1 class="text-xl sm:text-2xl font-bold">NWC Project Financial Projection</h1>
             <p class="text-sm mt-1">Enter project values to calculate revenue, costs, and profit. All values in Saudi Riyal (SAR).</p>
             <p class="text-sm text-green-400 mt-1">Data is synced in real-time for all users.</p>
         </div>
         
-        <div class="info-bar flex flex-wrap items-center gap-4 p-3 sm:p-2">
-            <div>Date: <input type="text" id="record-date" class="w-28" readonly></div>
-            <div class="flex items-center gap-2">Location: <input type="text" id="record-location" class="w-40" placeholder="Not captured" readonly></div>
+        <div class="info-bar flex flex-wrap items-center gap-x-4 gap-y-2 p-3 sm:p-2">
+            <div class="flex items-center">Date: <input type="text" id="record-date" class="w-32" readonly></div>
+            <div class="flex items-center flex-grow">Location: <input type="text" id="record-location" class="w-full min-w-[300px]" placeholder="Not captured" readonly></div>
             <button id="get-location-btn" class="action-btn !bg-gray-200 !text-gray-800 hover:!bg-gray-300 !py-1 !px-3">Get Location</button>
         </div>
 
         <div class="actions-bar flex flex-wrap items-center gap-2 p-3 sm:p-4">
             <button id="save-record-btn" class="action-btn primary">Save Record</button>
             <button id="view-records-btn" class="action-btn">View Saved Records</button>
+            <button id="manage-users-btn" class="action-btn hidden">Manage Users</button>
             <button id="export-btn" class="action-btn">Export to Excel (.csv)</button>
             <button id="print-btn" class="action-btn">Print to PDF</button>
         </div>
@@ -251,15 +254,17 @@
                     </tr>
                 </thead>
                 <tbody id="table-body">
-                    <tr><td colspan="6" class="text-center p-8">Connecting to database...</td></tr>
+                    <tr><td colspan="5" class="text-center p-8">Please log in to start.</td></tr>
                 </tbody>
                 <tfoot>
                     <tr class="total-row" style="background-color: #e5e7eb;">
-                        <td colspan="5" class="font-bold text-lg">Total Project Cost</td>
+                        <td></td>
+                        <td colspan="4" class="font-bold text-lg">Total Project Cost</td>
                         <td id="total-project-cost" class="font-bold text-lg currency">0.00</td>
                     </tr>
                     <tr id="profit-loss-row">
-                        <td colspan="5" class="font-bold text-lg">Net Profit / Loss</td>
+                        <td></td>
+                        <td colspan="4" class="font-bold text-lg">Net Profit / Loss</td>
                         <td id="net-profit-loss" class="font-bold text-lg currency">0.00</td>
                     </tr>
                 </tfoot>
@@ -267,26 +272,62 @@
         </div>
     </div>
 
-    <!-- Modal for Saved Records -->
-    <div id="records-modal" class="modal-overlay hidden">
+    <!-- Modals -->
+    <div id="records-modal" class="overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Saved Records</h2>
-                <button id="modal-close-btn" class="modal-close-btn">&times;</button>
+                <button class="modal-close-btn" onclick="window.closeModal('records-modal')">&times;</button>
             </div>
-            <div id="records-list">
-                <!-- Saved records will be listed here -->
+            <div id="records-list"></div>
+        </div>
+    </div>
+    <div id="users-modal" class="overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>User Management</h2>
+                <button class="modal-close-btn" onclick="window.closeModal('users-modal')">&times;</button>
             </div>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Add New User</h3>
+                    <div class="flex flex-wrap gap-4 items-end">
+                        <div class="flex-grow">
+                            <label for="new-username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="new-username" class="mt-1 block w-full !text-left">
+                        </div>
+                        <div class="flex-grow">
+                            <label for="new-mobile" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+                            <input type="text" id="new-mobile" class="mt-1 block w-full !text-left">
+                        </div>
+                        <button id="add-user-btn" class="action-btn primary">Add User</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Existing Users</h3>
+                    <div id="users-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Generic Modal for alerts, confirms, prompts -->
+    <div id="generic-modal" class="overlay hidden">
+        <div class="modal-content max-w-sm">
+            <h3 id="modal-title" class="text-lg font-medium text-gray-900 mb-4"></h3>
+            <div id="modal-text" class="text-sm text-gray-600 mb-4"></div>
+            <div id="modal-prompt-input-container" class="hidden mb-4">
+                 <label id="modal-prompt-label" for="modal-prompt-input" class="block text-sm font-medium text-gray-700"></label>
+                 <input type="text" id="modal-prompt-input" class="mt-1 block w-full !text-left">
+            </div>
+            <div id="modal-buttons" class="flex justify-end gap-4"></div>
         </div>
     </div>
 
     <script type="module">
-        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyB_PWfver0TH_a5vtTIRXYZj1kMRiEKH08",
             authDomain: "nwc-project-db.firebaseapp.com",
@@ -297,8 +338,7 @@
         };
         
         let db, auth;
-        let currentData = [];
-        let projectionDocRef, savedRecordsColRef;
+        let projectionDocRef, savedRecordsColRef, usersColRef;
 
         const defaultData = [
             { freq: 'Revenue per Site', cat: 'Revenue', item: 'Apator water meter', qty: 5, price: 3200, type: 'revenue' },
@@ -325,30 +365,58 @@
             { freq: 'Cost per Site', cat: 'Works', item: 'Soil Testing', qty: 5, price: 200, type: 'cost' },
         ];
 
-        // --- UTILITY FUNCTIONS ---
+        let modalResolve;
+        function showModal({ type = 'alert', title, text, promptLabel = '' }) {
+            const modal = document.getElementById('generic-modal');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-text').innerHTML = text.replace(/\n/g, '<br>');
+            const buttonsEl = document.getElementById('modal-buttons');
+            const promptContainer = document.getElementById('modal-prompt-input-container');
+            const promptInput = document.getElementById('modal-prompt-input');
+            buttonsEl.innerHTML = '';
+            promptContainer.classList.add('hidden');
+
+            if (type === 'alert') {
+                buttonsEl.innerHTML = `<button class="action-btn primary">OK</button>`;
+                buttonsEl.querySelector('button').onclick = () => closeModal(true);
+            } else if (type === 'confirm') {
+                buttonsEl.innerHTML = `<button class="action-btn">Cancel</button><button class="action-btn primary">OK</button>`;
+                buttonsEl.querySelector('.primary').onclick = () => closeModal(true);
+                buttonsEl.querySelector('.action-btn:not(.primary)').onclick = () => closeModal(false);
+            } else if (type === 'prompt') {
+                document.getElementById('modal-prompt-label').textContent = promptLabel;
+                promptInput.value = '';
+                promptContainer.classList.remove('hidden');
+                buttonsEl.innerHTML = `<button class="action-btn">Cancel</button><button class="action-btn primary">Save</button>`;
+                buttonsEl.querySelector('.primary').onclick = () => closeModal(promptInput.value);
+                buttonsEl.querySelector('.action-btn:not(.primary)').onclick = () => closeModal(null);
+                setTimeout(() => promptInput.focus(), 100);
+            }
+            modal.classList.remove('hidden');
+            return new Promise(resolve => { modalResolve = resolve; });
+        }
+
+        function closeModal(value) {
+            document.getElementById('generic-modal').classList.add('hidden');
+            if (modalResolve) modalResolve(value);
+        }
+
         function formatCurrency(num) {
             return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // --- DATA & UI FUNCTIONS ---
         async function updateDataInFirestore() {
             const dataToSave = [];
             document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
                  dataToSave.push({
-                    freq: row.cells[0].innerText,
-                    cat: row.cells[1].innerText,
-                    item: row.cells[2].innerText,
+                    freq: row.dataset.freq, cat: row.cells[1].innerText, item: row.cells[2].innerText,
                     qty: parseFloat(row.querySelector('.qty-input').value) || 0,
                     price: parseFloat(row.querySelector('.price-input').value) || 0,
                     type: row.dataset.type,
                 });
             });
-            try {
-                await setDoc(projectionDocRef, { data: dataToSave });
-            } catch (error) {
-                console.error("Error updating document: ", error);
-                alert("Could not save changes to the database.");
-            }
+            try { await setDoc(projectionDocRef, { data: dataToSave }); } 
+            catch (error) { console.error("Error updating document: ", error); }
         }
         
         function handleLocalInput() {
@@ -358,8 +426,7 @@
         window.handleLocalInput = handleLocalInput;
 
         function calculateAll() {
-            let totalRevenue = 0;
-            let totalCost = 0;
+            let totalRevenue = 0, totalCost = 0;
             document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
                 const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
                 const price = parseFloat(row.querySelector('.price-input').value) || 0;
@@ -381,24 +448,21 @@
         }
 
         function renderTable(data) {
-            currentData = data;
             const tableBody = document.getElementById('table-body');
             tableBody.innerHTML = ''; 
             let lastFreq = '';
-            currentData.forEach(d => {
+            data.forEach(d => {
                 if (d.freq !== lastFreq) {
                     const headerRow = document.createElement('tr');
                     headerRow.className = 'category-header';
-                    headerRow.innerHTML = `<td colspan="6">${d.freq}</td>`;
+                    headerRow.innerHTML = `<td></td><td colspan="5">${d.freq}</td>`;
                     tableBody.appendChild(headerRow);
                     lastFreq = d.freq;
                 }
                 const row = document.createElement('tr');
-                row.dataset.type = d.type;
+                row.dataset.type = d.type; row.dataset.freq = d.freq;
                 row.innerHTML = `
-                    <td>${d.freq}</td>
-                    <td>${d.cat}</td>
-                    <td>${d.item}</td>
+                    <td>${d.freq}</td> <td>${d.cat}</td> <td>${d.item}</td>
                     <td><input type="number" class="qty-input" value="${d.qty}" oninput="window.handleLocalInput()"></td>
                     <td class="currency"><input type="number" class="price-input" value="${d.price}" oninput="window.handleLocalInput()"></td>
                     <td class="currency total-cell">0.00</td>
@@ -408,18 +472,23 @@
             calculateAll();
         }
 
-        // --- EVENT HANDLERS & SETUP ---
         function setupEventListeners() {
             document.getElementById('print-btn').addEventListener('click', () => window.print());
             document.getElementById('export-btn').addEventListener('click', exportToCsv);
             document.getElementById('get-location-btn').addEventListener('click', getLocation);
             document.getElementById('save-record-btn').addEventListener('click', saveRecord);
             document.getElementById('view-records-btn').addEventListener('click', openRecordsModal);
-            document.getElementById('modal-close-btn').addEventListener('click', closeRecordsModal);
+            document.getElementById('manage-users-btn').addEventListener('click', openUsersModal);
+            document.getElementById('add-user-btn').addEventListener('click', addUser);
         }
 
         function setDate() {
-            document.getElementById('record-date').value = new Date().toLocaleDateString('en-CA');
+            const dateField = document.getElementById('record-date');
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear().toString().slice(-2);
+            dateField.value = `${day}.${month}.${year}`;
         }
 
         function getLocation() {
@@ -427,74 +496,51 @@
             if (navigator.geolocation) {
                 locationField.value = "Fetching...";
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude.toFixed(5);
-                        const lon = position.coords.longitude.toFixed(5);
-                        locationField.value = `${lat}, ${lon}`;
-                    },
+                    (p) => { locationField.value = `${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`; },
                     () => { locationField.value = "Unable to retrieve location."; }
                 );
-            } else {
-                locationField.value = "Geolocation not supported.";
-            }
+            } else { locationField.value = "Geolocation not supported."; }
         }
 
         async function saveRecord() {
-            const recordName = prompt("Enter a name for this record:", `Record ${new Date().toLocaleString()}`);
+            const recordName = await showModal({ type: 'prompt', title: 'Save Record', text: 'Enter a name for this record.', promptLabel: 'Record Name' });
             if (!recordName) return;
-
             const recordData = [];
             document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
                 recordData.push({
-                    freq: row.cells[0].innerText, cat: row.cells[1].innerText, item: row.cells[2].innerText,
+                    freq: row.dataset.freq, cat: row.cells[1].innerText, item: row.cells[2].innerText,
                     qty: parseFloat(row.querySelector('.qty-input').value) || 0,
                     price: parseFloat(row.querySelector('.price-input').value) || 0,
                     type: row.dataset.type,
                 });
             });
-
             try {
                 await addDoc(savedRecordsColRef, { name: recordName, data: recordData, createdAt: new Date() });
-                alert(`Record "${recordName}" saved.`);
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("Failed to save record.");
-            }
+                await showModal({ type: 'alert', title: 'Success', text: `Record "${recordName}" saved.` });
+            } catch (error) { await showModal({ type: 'alert', title: 'Error', text: "Failed to save record." }); }
         }
+
+        window.closeModal = (modalId) => document.getElementById(modalId).classList.add('hidden');
+        window.openModal = (modalId) => document.getElementById(modalId).classList.remove('hidden');
 
         async function openRecordsModal() {
             const listContainer = document.getElementById('records-list');
             listContainer.innerHTML = '<p>Loading records...</p>';
-            document.getElementById('records-modal').classList.remove('hidden');
-
+            openModal('records-modal');
             try {
                 const querySnapshot = await getDocs(savedRecordsColRef);
                 listContainer.innerHTML = '';
-                if (querySnapshot.empty) {
-                    listContainer.innerHTML = '<p>No saved records found.</p>';
-                } else {
+                if (querySnapshot.empty) { listContainer.innerHTML = '<p>No saved records found.</p>'; }
+                else {
                     querySnapshot.forEach(doc => {
                         const record = doc.data();
                         const item = document.createElement('div');
                         item.className = 'record-item';
-                        item.innerHTML = `
-                            <span>${record.name}</span>
-                            <div class="flex gap-2">
-                                <button class="action-btn" onclick="window.loadRecord('${doc.id}')">Load</button>
-                                <button class="action-btn" style="background-color: #ef4444; color: white;" onclick="window.deleteRecord('${doc.id}')">Delete</button>
-                            </div>
-                        `;
+                        item.innerHTML = `<span>${record.name}</span> <div class="flex gap-2"> <button class="action-btn" onclick="window.loadRecord('${doc.id}')">Load</button> <button class="action-btn" style="background-color: #ef4444; color: white;" onclick="window.deleteRecord('${doc.id}')">Delete</button> </div>`;
                         listContainer.appendChild(item);
                     });
                 }
-            } catch (error) {
-                console.error("Error getting records: ", error);
-                listContainer.innerHTML = '<p>Could not load records.</p>';
-            }
-        }
-
-        function closeRecordsModal() {
-            document.getElementById('records-modal').classList.add('hidden');
+            } catch (error) { listContainer.innerHTML = '<p>Could not load records.</p>'; }
         }
 
         window.loadRecord = async (id) => {
@@ -504,43 +550,34 @@
                 if (docSnap.exists()) {
                     const recordToLoad = docSnap.data();
                     await setDoc(projectionDocRef, { data: recordToLoad.data });
-                    closeRecordsModal();
-                    alert(`Record "${recordToLoad.name}" loaded.`);
+                    closeModal('records-modal');
+                    await showModal({ type: 'alert', title: 'Success', text: `Record "${recordToLoad.name}" loaded.` });
                 }
-            } catch (error) {
-                console.error("Error loading record: ", error);
-                alert("Failed to load record.");
-            }
+            } catch (error) { await showModal({ type: 'alert', title: 'Error', text: "Failed to load record." }); }
         };
 
         window.deleteRecord = async (id) => {
-            if (!confirm("Are you sure you want to delete this record?")) return;
+            const confirmed = await showModal({ type: 'confirm', title: 'Delete Record', text: "Are you sure you want to delete this record?" });
+            if (!confirmed) return;
             try {
-                const docRef = doc(savedRecordsColRef, id);
-                await deleteDoc(docRef);
-                openRecordsModal(); // Refresh the modal list
-            } catch (error) {
-                console.error("Error deleting record: ", error);
-                alert("Failed to delete record.");
-            }
+                await deleteDoc(doc(savedRecordsColRef, id));
+                openRecordsModal();
+            } catch (error) { await showModal({ type: 'alert', title: 'Error', text: "Failed to delete record." }); }
         };
         
         function exportToCsv() {
             let csv = [];
-            const totalRevenue = document.getElementById('summary-revenue').textContent;
-            const totalCost = document.getElementById('summary-cost').textContent;
-            const netProfit = document.getElementById('summary-profit').textContent;
             csv.push(`"NWC Project Financial Summary"`);
             csv.push(`"Date","${document.getElementById('record-date').value}"`);
             csv.push(`"Location","${document.getElementById('record-location').value}"`);
-            csv.push(`"Total Revenue","${totalRevenue}"`);
-            csv.push(`"Total Cost","${totalCost}"`);
-            csv.push(`"Net Profit / Loss","${netProfit}"`);
+            csv.push(`"Total Revenue","${document.getElementById('summary-revenue').textContent}"`);
+            csv.push(`"Total Cost","${document.getElementById('summary-cost').textContent}"`);
+            csv.push(`"Net Profit / Loss","${document.getElementById('summary-profit').textContent}"`);
             csv.push('');
             csv.push(`"Frequency","Category","Item / Role","Qty","Unit Price","Total"`);
-            document.getElementById('table-body').querySelectorAll('tr:not(.category-header)').forEach(row => {
+            document.getElementById('table-body').querySelectorAll('tr[data-type]').forEach(row => {
                 const rowData = [
-                    `"${row.cells[0].innerText}"`, `"${row.cells[1].innerText}"`, `"${row.cells[2].innerText}"`,
+                    `"${row.dataset.freq}"`, `"${row.cells[1].innerText}"`, `"${row.cells[2].innerText}"`,
                     `"${row.cells[3].querySelector('input').value}"`, `"${row.cells[4].querySelector('input').value}"`,
                     `"${row.cells[5].innerText.replace(/,/g, '')}"`
                 ];
@@ -556,63 +593,118 @@
             document.body.removeChild(link);
         }
 
-        // --- INITIALIZATION ---
-        async function main() {
-            // 1. Initialize Firebase
-            if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.includes("PASTE_YOUR_REAL")) {
-                document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Firebase configuration is missing or invalid. Please paste your real API key.</td></tr>';
-                return;
-            }
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-            } catch (error) {
-                 document.getElementById('table-body').innerHTML = `<tr><td colspan="6" class="text-center p-8 text-red-500">Firebase initialization failed: ${error.message}</td></tr>`;
-                 return;
-            }
-
-            // 2. Authenticate User
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Authentication failed:", error);
-                document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Authentication failed. Cannot connect to the database.</td></tr>';
-                return;
-            }
+        async function handleLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('login-error');
             
-            // 3. Define Firestore references
-            const basePath = `nwc-projections/live`;
-            projectionDocRef = doc(db, `${basePath}/projection_data/current_state`);
-            savedRecordsColRef = collection(db, `${basePath}/saved_records`);
+            const users = await getDocs(usersColRef).then(snap => snap.docs.map(d => ({...d.data(), id: d.id})));
+            const validUser = users.find(u => u.username === user && u.password === pass);
 
-            // 4. Setup real-time listener
+            if (validUser) {
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                if (validUser.role === 'admin') {
+                    document.getElementById('manage-users-btn').classList.remove('hidden');
+                }
+                startApp();
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+        
+        async function startApp() {
             onSnapshot(projectionDocRef, (docSnap) => {
-                // If the snapshot has pending writes, it's a local change from this client.
-                // The local UI is already updated, so we skip the full re-render to avoid losing focus.
-                if (docSnap.metadata.hasPendingWrites) {
-                    return;
-                }
-
-                if (docSnap.exists()) {
-                    renderTable(docSnap.data().data);
-                } else {
-                    // If document doesn't exist, create it with default data
-                    setDoc(projectionDocRef, { data: defaultData }).then(() => {
-                        renderTable(defaultData);
-                    });
-                }
+                if (docSnap.metadata.hasPendingWrites) return;
+                if (docSnap.exists()) { renderTable(docSnap.data().data); } 
+                else { setDoc(projectionDocRef, { data: defaultData }).then(() => renderTable(defaultData)); }
             }, (error) => {
                 console.error("Error listening to document:", error);
-                document.getElementById('table-body').innerHTML = '<tr><td colspan="6" class="text-center p-8 text-red-500">Error connecting to the database. Please check your connection and refresh.</td></tr>';
+                document.getElementById('table-body').innerHTML = '<tr><td colspan="5" class="text-center p-8 text-red-500">Connection error.</td></tr>';
             });
-
-            // 5. Setup UI
             setupEventListeners();
             setDate();
         }
 
-        main();
+        async function initializeLogin() {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            await signInAnonymously(auth);
+            
+            const basePath = `nwc-projections/live`;
+            usersColRef = collection(db, `${basePath}/users`);
+            projectionDocRef = doc(db, `${basePath}/projection_data/current_state`);
+            savedRecordsColRef = collection(db, `${basePath}/saved_records`);
+
+            const usersSnap = await getDocs(usersColRef);
+            if (usersSnap.empty) {
+                await addDoc(usersColRef, { username: 'admin', password: 'password123', role: 'admin', mobile: 'N/A' });
+                await addDoc(usersColRef, { username: 'user', password: 'user123', role: 'user', mobile: 'N/A' });
+            }
+        }
+
+        async function addUser() {
+            const username = document.getElementById('new-username').value;
+            const mobile = document.getElementById('new-mobile').value;
+            if (!username || !mobile) {
+                await showModal({ type: 'alert', title: 'Input Required', text: 'Please provide a username and mobile number.' });
+                return;
+            }
+            const password = Math.random().toString(36).slice(-8);
+            try {
+                await addDoc(usersColRef, { username, password, mobile, role: 'user' });
+                await showModal({ type: 'alert', title: 'User Created', text: `User "${username}" created.\nPassword: <b>${password}</b>\n\nNOTE: Please share these details manually.` });
+                document.getElementById('new-username').value = '';
+                document.getElementById('new-mobile').value = '';
+                openUsersModal();
+            } catch (e) { await showModal({ type: 'alert', title: 'Error', text: 'Failed to add user.' }); }
+        }
+
+        async function openUsersModal() {
+            const listContainer = document.getElementById('users-list');
+            listContainer.innerHTML = '<p>Loading users...</p>';
+            openModal('users-modal');
+            const users = await getDocs(usersColRef).then(snap => snap.docs.map(d => ({...d.data(), id: d.id})));
+            listContainer.innerHTML = '';
+            users.filter(u => u.role !== 'admin').forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'record-item';
+                item.innerHTML = `
+                    <div>
+                        <p class="font-medium">${user.username}</p>
+                        <p class="text-sm text-gray-500">${user.mobile}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="action-btn" onclick="window.resetPassword('${user.id}', '${user.username}')">Reset Password</button>
+                        <button class="action-btn" style="background-color: #ef4444; color: white;" onclick="window.deleteUser('${user.id}')">Delete</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+        
+        window.resetPassword = async (id, username) => {
+            const confirmed = await showModal({ type: 'confirm', title: 'Reset Password', text: `Are you sure you want to reset the password for ${username}?` });
+            if (!confirmed) return;
+            const newPassword = Math.random().toString(36).slice(-8);
+            try {
+                await updateDoc(doc(usersColRef, id), { password: newPassword });
+                await showModal({ type: 'alert', title: 'Password Reset', text: `Password for "${username}" has been reset.\nNew Password: <b>${newPassword}</b>\n\nNOTE: Please share this manually.` });
+            } catch (e) { await showModal({ type: 'alert', title: 'Error', text: 'Failed to reset password.' }); }
+        }
+
+        window.deleteUser = async (id) => {
+            const confirmed = await showModal({ type: 'confirm', title: 'Delete User', text: "Are you sure you want to delete this user?" });
+            if (!confirmed) return;
+            try {
+                await deleteDoc(doc(usersColRef, id));
+                openUsersModal();
+            } catch (e) { await showModal({ type: 'alert', title: 'Error', text: "Failed to delete user." }); }
+        }
+
+        document.getElementById('login-btn').addEventListener('click', handleLogin);
+        initializeLogin();
 
     </script>
 
